@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { FaHeart, FaShare, FaStar } from "react-icons/fa";
 
 export default function ProductCard({ product }) {
@@ -26,18 +27,14 @@ export default function ProductCard({ product }) {
           ))}
           <span className="text-sm ml-1">{product.rating}</span>
         </div>
-        <div className="flex justify-between items-center mt-4">
+        <div className="flex flex-wrap  justify-between items-center mt-4">
           <span className="text-xl font-bold">${product.price}</span>
-          <button className="btn btn-primary">Add to Cart</button>
+           <Link href={`/products/${product.id}`}>
+           
+          <button className="btn btn-primary">view Details</button>
+           </Link>
         </div>
-        <div className="card-actions justify-end mt-4">
-          <button className="btn btn-ghost btn-circle">
-            <FaHeart className="text-red-500" />
-          </button>
-          <button className="btn btn-ghost btn-circle">
-            <FaShare />
-          </button>
-        </div>
+       
       </div>
     </div>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Head from "next/head";
 import ProductList from "../components/ProductList";
 import SearchBar from "../components/SearchBar";
@@ -15,21 +14,34 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
-  const router = useRouter();
+  const [searchInput, setSearchInput] = useState(""); // State for search input
+  const [selectedCategory, setSelectedCategory] = useState(""); // State for selected category
+  const [hasMore, setHasMore] = useState(true); // Track if more products can be loaded
+  const [noProductsFound, setNoProductsFound] = useState(false); // New state for search result
 
-  // Ensure router.query exists before destructuring
-  const { category = null, search = "" } = router.query || {};
 
   useEffect(() => {
     const loadInitialData = async () => {
       try {
         setLoading(true);
+        setNoProductsFound(false); // Reset the "no products found" state
         const [productsData, categoriesData] = await Promise.all([
-          fetchProducts({ category, search, page: 1 }),
+          fetchProducts({
+            category: selectedCategory,
+            search: searchInput,
+            page: 1,
+          }),
           fetchCategories(),
         ]);
         setProducts(productsData.products);
         setCategories(categoriesData);
+        setPage(1); // Reset to the first page on new search or category selection
+        setHasMore(productsData.products.length > 0); // If no products, disable loading more
+
+        // If no products are found for the search, set `noProductsFound` to true
+        if (productsData.products.length === 0 && searchInput) {
+          setNoProductsFound(true);
+        }
       } catch (err) {
         setError("Failed to load initial data");
       } finally {
@@ -38,20 +50,29 @@ export default function Home() {
     };
 
     loadInitialData();
-  }, [category, search]);
+  }, [selectedCategory, searchInput]); // Watch both search input and category for changes
 
   const loadMoreProducts = async () => {
-    if (loading) return;
+    if (loading || !hasMore) return; // Prevent loading more if already loading or no more products
+
     try {
       setLoading(true);
       const nextPage = page + 1;
       const newProducts = await fetchProducts({
-        category,
-        search,
+        category: selectedCategory,
+        search: searchInput,
         page: nextPage,
       });
-      setProducts((prevProducts) => [...prevProducts, ...newProducts.products]);
-      setPage(nextPage);
+
+      if (newProducts.products.length === 0) {
+        setHasMore(false); // No more products to load
+      } else {
+        setProducts((prevProducts) => [
+          ...prevProducts,
+          ...newProducts.products,
+        ]);
+        setPage(nextPage);
+      }
     } catch (err) {
       setError("Failed to load more products");
     } finally {
@@ -60,17 +81,11 @@ export default function Home() {
   };
 
   const handleSearch = (searchTerm) => {
-    router.push({
-      pathname: "/",
-      query: { ...router.query, search: searchTerm },
-    });
+    setSearchInput(searchTerm); // Update search input state
   };
 
-  const handleCategoryChange = (selectedCategory) => {
-    router.push({
-      pathname: "/",
-      query: { ...router.query, category: selectedCategory },
-    });
+  const handleCategoryChange = async (category) => {
+    setSelectedCategory(category); // Update selected category state
   };
 
   return (
@@ -81,7 +96,9 @@ export default function Home() {
       </Head>
 
       <header className="py-6">
-        <h1 className="text-4xl font-bold text-center text-red-500">ShopSquire</h1>
+        <h1 className="text-4xl font-bold text-center text-red-500">
+          ShopSquire
+        </h1>
       </header>
 
       <main>
@@ -95,23 +112,35 @@ export default function Home() {
 
         {error && <div className="alert alert-error">{error}</div>}
 
-        <ProductList products={products} />
-
-        {loading && (
-          <div className="flex justify-center items-center py-4">
-            <FaSpinner className="animate-spin text-4xl text-primary" />
+        {noProductsFound ? (
+          <div className="text-center text-gray-500">
+            Products not found for the search term "{searchInput}"
           </div>
-        )}
+        ) : (
+          <>
+            <ProductList products={products} />
 
-        <div className="text-center mt-8">
-          <button
-            className="btn btn-primary"
-            onClick={loadMoreProducts}
-            disabled={loading}
-          >
-            Load More
-          </button>
-        </div>
+            {loading && (
+              <div className="flex justify-center items-center py-4">
+                <FaSpinner className="animate-spin text-4xl text-primary" />
+              </div>
+            )}
+
+            <div className="text-center mt-8">
+              {!hasMore ? (
+                <p className="text-gray-500">You reached the end</p>
+              ) : (
+                <button
+                  className="btn bg-blue-500 text-white"
+                  onClick={loadMoreProducts}
+                  disabled={loading}
+                >
+                  Load More
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </main>
     </div>
   );

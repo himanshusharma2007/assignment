@@ -20,6 +20,8 @@ exports.getProducts = async (req, res) => {
   try {
     console.log("Fetching products");
     const { page = 1, limit = 10, category, search } = req.query;
+    console.log("Incoming query:", req.query);
+
     const query = {};
 
     if (category) {
@@ -41,6 +43,7 @@ exports.getProducts = async (req, res) => {
     const count = await Product.countDocuments(query);
 
     console.log(`Fetched ${products.length} products`);
+    console.log("products",products)
     res.json({
       products,
       totalPages: Math.ceil(count / limit),

@@ -9,6 +9,7 @@ export const fetchProducts = async ({
   page = 1,
   limit = 10,
 }) => {
+  console.log("category in fetchProducts :>> ", category);
   try {
     const response = await axios.get(`${API_BASE_URL}/products`, {
       params: { category, search, page, limit },
@@ -26,6 +27,16 @@ export const fetchCategories = async () => {
     return response.data;
   } catch (error) {
     console.error("Error fetching categories:", error);
+    throw error;
+  }
+};
+
+export const getProductById = async (id) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/products/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching product details:", error);
     throw error;
   }
 };
