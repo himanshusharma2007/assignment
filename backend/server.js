@@ -22,6 +22,6 @@ app.get("/",(req,res)=>{
 app.use("/api/products",productsRouter)
 app.listen(PORT,async()=>{
     connectMongoDB();
-    // await seedDatabase();
+    await seedDatabase();
     console.log(`server is running on the port ${PORT}`)
 })
