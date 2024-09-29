@@ -1,26 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 
 export default function SearchBar({ onSearch }) {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  useEffect(() => {
+
     onSearch(searchTerm);
-  };
+  }, [searchTerm, onSearch]); 
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center">
+    <div className="relative flex items-center bg min-w-[320px]">
       <input
         type="text"
         placeholder="Search products..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="input input-bordered w-full max-w-xs"
+        className="input input-bordered w-full  pl-10" // Add padding for the icon
       />
-      <button type="submit" className="btn btn-primary ml-2">
-        <FaSearch />
-      </button>
-    </form>
+      <FaSearch className="absolute left-3 text-gray-500" />{" "}
+      {/* Search icon inside input */}
+    </div>
   );
 }

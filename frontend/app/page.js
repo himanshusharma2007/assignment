@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import Head from "next/head";
 import ProductList from "../components/ProductList";
 import SearchBar from "../components/SearchBar";
 import CategorySelector from "../components/CategorySelector";
@@ -59,10 +58,7 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4">
-      <Head>
-        <title>ShopSquire</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+   
 
       <header className="py-6">
         <h1 className="text-4xl font-bold text-center text-red-500">

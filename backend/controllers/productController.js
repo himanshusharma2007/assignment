@@ -43,7 +43,6 @@ exports.getProducts = async (req, res) => {
     const count = await Product.countDocuments(query);
 
     console.log(`Fetched ${products.length} products`);
-    console.log("products",products)
     res.json({
       products,
       totalPages: Math.ceil(count / limit),
@@ -74,60 +73,3 @@ exports.getProductById = async (req, res) => {
       .json({ message: "Error fetching product", error: err.message });
   }
 };
-
-// exports.createProduct = async (req, res) => {
-//   try {
-//     console.log("Creating new product");
-//     const newProduct = new Product(req.body);
-//     await newProduct.save();
-//     console.log("New product created");
-//     res.status(201).json(newProduct);
-//   } catch (err) {
-//     console.error("Error in createProduct:", err);
-//     res
-//       .status(400)
-//       .json({ message: "Error creating product", error: err.message });
-//   }
-// };
-
-// exports.updateProduct = async (req, res) => {
-//   try {
-//     console.log(`Updating product with id: ${req.params.id}`);
-//     const updatedProduct = await Product.findOneAndUpdate(
-//       { id: req.params.id },
-//       req.body,
-//       { new: true }
-//     );
-//     if (!updatedProduct) {
-//       console.log("Product not found for update");
-//       return res.status(404).json({ message: "Product not found" });
-//     }
-//     console.log("Product updated");
-//     res.json(updatedProduct);
-//   } catch (err) {
-//     console.error("Error in updateProduct:", err);
-//     res
-//       .status(400)
-//       .json({ message: "Error updating product", error: err.message });
-//   }
-// };
-
-// exports.deleteProduct = async (req, res) => {
-//   try {
-//     console.log(`Deleting product with id: ${req.params.id}`);
-//     const deletedProduct = await Product.findOneAndDelete({
-//       id: req.params.id,
-//     });
-//     if (!deletedProduct) {
-//       console.log("Product not found for deletion");
-//       return res.status(404).json({ message: "Product not found" });
-//     }
-//     console.log("Product deleted");
-//     res.json({ message: "Product deleted successfully" });
-//   } catch (err) {
-//     console.error("Error in deleteProduct:", err);
-//     res
-//       .status(500)
-//       .json({ message: "Error deleting product", error: err.message });
-//   }
-// };
