@@ -1,38 +1,29 @@
-"use client"; // Mark this component as a Client Component
+"use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation"; // Use next/navigation instead of next/router
-import Head from "next/head";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { FaArrowLeft, FaStar, FaSpinner } from "react-icons/fa";
-import { getProductById } from "../../../utils/api";
+import { fetchProductDetailsAsync } from "../../../redux/slices/productDetailsSlice";
 
 export default function ProductDetails() {
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const {
+    item: product,
+    loading,
+    error,
+  } = useSelector((state) => state.productDetails);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [imageLoading, setImageLoading] = useState(true); // New loading state for images
+  const [imageLoading, setImageLoading] = useState(true);
   const router = useRouter();
-  const { id } =useParams();
+  const { id } = useParams();
 
   useEffect(() => {
     if (id) {
-      fetchProductDetails();
+      dispatch(fetchProductDetailsAsync(id));
     }
-  }, [id]);
-
-  const fetchProductDetails = async () => {
-    try {
-      setLoading(true);
-      const data = await getProductById(id);
-      setProduct(data);
-    } catch (err) {
-      setError("Failed to load product details");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [dispatch, id]);
 
   const handleGoBack = () => {
     router.back();
@@ -67,8 +58,8 @@ export default function ProductDetails() {
   }
 
   return (
-    <div className="container mx-auto px-4 ">
-       <header className="py-6">
+    <div className="container mx-auto px-4">
+      <header className="py-6">
         <h1 className="text-4xl font-bold text-center text-red-500">
           ShopSquire
         </h1>
@@ -80,7 +71,7 @@ export default function ProductDetails() {
         <FaArrowLeft className="text-xl" />
       </button>
 
-      <div className="flex flex-col md:flex-row gap-8 justify-center items-center  min-h-screen">
+      <div className="flex flex-col md:flex-row gap-8 justify-center items-center min-h-screen">
         <div className="md:w-1/2">
           <div className="relative h-96 w-full">
             {imageLoading && (
@@ -94,8 +85,8 @@ export default function ProductDetails() {
               layout="fill"
               objectFit="contain"
               className="rounded-lg"
-              onLoad={() => setImageLoading(false)} // Set loading to false when the image loads
-              onError={() => setImageLoading(false)} // Also set to false if there's an error
+              onLoad={() => setImageLoading(false)}
+              onError={() => setImageLoading(false)}
             />
             <button
               onClick={handlePrevImage}

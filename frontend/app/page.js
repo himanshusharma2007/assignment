@@ -1,91 +1,60 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Head from "next/head";
 import ProductList from "../components/ProductList";
 import SearchBar from "../components/SearchBar";
 import CategorySelector from "../components/CategorySelector";
-import { fetchProducts, fetchCategories } from "../utils/api";
 import { FaSpinner } from "react-icons/fa";
+import { fetchProductsAsync } from "../redux/slices/productSlice";
+import { fetchCategoriesAsync } from "../redux/slices/categoriesSlice";
 
 export default function Home() {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
-  const [searchInput, setSearchInput] = useState(""); // State for search input
-  const [selectedCategory, setSelectedCategory] = useState(""); // State for selected category
-  const [hasMore, setHasMore] = useState(true); // Track if more products can be loaded
-  const [noProductsFound, setNoProductsFound] = useState(false); // New state for search result
-
+  const dispatch = useDispatch();
+  const {
+    items: products,
+    loading,
+    error,
+    hasMore,
+    page,
+    noProductsFound,
+  } = useSelector((state) => state.products);
+  const { items: categories } = useSelector((state) => state.categories);
+  const [searchInput, setSearchInput] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        setLoading(true);
-        setNoProductsFound(false); // Reset the "no products found" state
-        const [productsData, categoriesData] = await Promise.all([
-          fetchProducts({
-            category: selectedCategory,
-            search: searchInput,
-            page: 1,
-          }),
-          fetchCategories(),
-        ]);
-        setProducts(productsData.products);
-        setCategories(categoriesData);
-        setPage(1); // Reset to the first page on new search or category selection
-        setHasMore(productsData.products.length > 0); // If no products, disable loading more
+    dispatch(fetchCategoriesAsync());
+  }, [dispatch]);
 
-        // If no products are found for the search, set `noProductsFound` to true
-        if (productsData.products.length === 0 && searchInput) {
-          setNoProductsFound(true);
-        }
-      } catch (err) {
-        setError("Failed to load initial data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadInitialData();
-  }, [selectedCategory, searchInput]); // Watch both search input and category for changes
-
-  const loadMoreProducts = async () => {
-    if (loading || !hasMore) return; // Prevent loading more if already loading or no more products
-
-    try {
-      setLoading(true);
-      const nextPage = page + 1;
-      const newProducts = await fetchProducts({
+  useEffect(() => {
+    dispatch(
+      fetchProductsAsync({
         category: selectedCategory,
         search: searchInput,
-        page: nextPage,
-      });
+        page: 1,
+      })
+    );
+  }, [dispatch, selectedCategory, searchInput]);
 
-      if (newProducts.products.length === 0) {
-        setHasMore(false); // No more products to load
-      } else {
-        setProducts((prevProducts) => [
-          ...prevProducts,
-          ...newProducts.products,
-        ]);
-        setPage(nextPage);
-      }
-    } catch (err) {
-      setError("Failed to load more products");
-    } finally {
-      setLoading(false);
-    }
+  const loadMoreProducts = () => {
+    if (loading || !hasMore) return;
+    dispatch(
+      fetchProductsAsync({
+        category: selectedCategory,
+        search: searchInput,
+        page: page + 1,
+      })
+    );
   };
 
   const handleSearch = (searchTerm) => {
-    setSearchInput(searchTerm); // Update search input state
+    setSearchInput(searchTerm);
   };
 
-  const handleCategoryChange = async (category) => {
-    setSelectedCategory(category); // Update selected category state
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
   };
 
   return (
