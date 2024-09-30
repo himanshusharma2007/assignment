@@ -47,7 +47,7 @@ nextApp.prepare().then(() => {
   // Start the server
   app.listen(PORT, async () => {
     await connectMongoDB();
-    await seedDatabase();
+    // await seedDatabase();
     console.log(`Server is running on port ${PORT}`);
   });
 });
