@@ -1,27 +1,48 @@
-const express=require("express")
-const app=express();
+const express = require("express");
+const next = require("next");
 const { connectMongoDB } = require("./db/connectToMongoDB");
-const {seedDatabase}=require("./scripts/seedDatabase")
+const { seedDatabase } = require("./scripts/seedDatabase");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const productsRouter=require("./routes/productsRouter")
+const productsRouter = require("./routes/productsRouter");
+const path = require("path");
 
 dotenv.config();
+
+const dev = process.env.NODE_ENV !== "production";
+const nextApp = next({ dev, dir: path.join(__dirname, "../frontend") });
+const handle = nextApp.getRequestHandler();
+
+const app = express();
+
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "http://localhost:5000",
     credentials: true,
   })
 );
 
 const PORT = process.env.PORT || 5000;
-app.get("/",(req,res)=>{
-    console.log("index route render")
-    res.send("working...")
-})
-app.use("/api/products",productsRouter)
-app.listen(PORT,async()=>{
-    connectMongoDB();
+
+nextApp.prepare().then(() => {
+  // Serve static files from the Next.js .next directory
+  app.use("/_next", express.static(path.join(__dirname, "../frontend/.next")));
+
+  // Serve static files from the public directory
+  app.use(express.static(path.join(__dirname, "../frontend/public")));
+
+  // API route for products
+  app.use("/api/products", productsRouter);
+
+  // Catch-all handler to let Next.js handle all other routes
+  app.all("*", (req, res) => {
+    return handle(req, res);
+  });
+
+  // Start the server
+  app.listen(PORT, async () => {
+    await connectMongoDB();
     await seedDatabase();
-    console.log(`server is running on the port ${PORT}`)
-})
+    console.log(`Server is running on port ${PORT}`);
+  });
+});
