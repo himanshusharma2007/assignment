@@ -17,10 +17,15 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5000",
+    origin: [
+      "http://localhost:5000",
+      "https://products-page-bnkv.onrender.com",
+      // Add any other origins you need to support
+    ],
     credentials: true,
   })
 );
+
 
 const PORT = process.env.PORT || 5000;
 
