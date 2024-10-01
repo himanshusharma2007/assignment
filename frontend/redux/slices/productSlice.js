@@ -1,8 +1,8 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { fetchProducts } from "../../api";
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { fetchProducts } from "../../utils/api";
 
 export const fetchProductsAsync = createAsyncThunk(
-  "products/fetchProducts",
+  'products/fetchProducts',
   async ({ category, search, page, limit }) => {
     const response = await fetchProducts({ category, search, page, limit });
     return response;
@@ -10,7 +10,7 @@ export const fetchProductsAsync = createAsyncThunk(
 );
 
 const productSlice = createSlice({
-  name: "products",
+  name: 'products',
   initialState: {
     items: [],
     loading: false,
@@ -37,8 +37,7 @@ const productSlice = createSlice({
         state.page = action.payload.currentPage;
         state.totalPages = action.payload.totalPages;
         state.hasMore = state.page < state.totalPages;
-        state.noProductsFound =
-          action.payload.products.length === 0 && state.page === 1;
+        state.noProductsFound = action.payload.products.length === 0 && state.page === 1;
       })
       .addCase(fetchProductsAsync.rejected, (state, action) => {
         state.loading = false;
