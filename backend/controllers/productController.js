@@ -3,9 +3,7 @@ const Product = require("../models/productModel");
 exports.getCategories = async (req, res) => {
   try {
     console.log("Fetching categories");
-    const products = await Product.find();
-    let categories = [...new Set(products.map((product) => product.category))];
-
+    const categories = await Product.distinct("category");
     console.log(`Fetched ${categories.length} categories`);
     res.json(categories);
   } catch (err) {
@@ -35,18 +33,23 @@ exports.getProducts = async (req, res) => {
       ];
     }
 
-    const products = await Product.find(query)
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .exec();
+    const options = {
+      limit: parseInt(limit),
+      skip: (parseInt(page) - 1) * parseInt(limit),
+      lean: true, // This will return plain JavaScript objects instead of Mongoose documents
+    };
 
-    const count = await Product.countDocuments(query);
+    const [products, count] = await Promise.all([
+      Product.find(query, null, options),
+      Product.countDocuments(query),
+    ]);
 
     console.log(`Fetched ${products.length} products`);
     res.json({
       products,
       totalPages: Math.ceil(count / limit),
-      currentPage: page,
+      currentPage: parseInt(page),
+      totalProducts: count,
     });
   } catch (err) {
     console.error("Error in getProducts:", err);
@@ -59,7 +62,7 @@ exports.getProducts = async (req, res) => {
 exports.getProductById = async (req, res) => {
   try {
     console.log(`Fetching product with id: ${req.params.id}`);
-    const product = await Product.findOne({ id: req.params.id });
+    const product = await Product.findOne({ id: req.params.id }).lean();
     if (!product) {
       console.log("Product not found");
       return res.status(404).json({ message: "Product not found" });

@@ -17,6 +17,7 @@ export default function Home() {
     error,
     hasMore,
     page,
+    totalPages,
     noProductsFound,
   } = useSelector((state) => state.products);
   const { items: categories } = useSelector((state) => state.categories);
@@ -58,8 +59,6 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4">
-   
-
       <header className="py-6">
         <h1 className="text-4xl font-bold text-center text-red-500">
           ShopSquire
@@ -92,9 +91,7 @@ export default function Home() {
             )}
 
             <div className="text-center mt-8">
-              {!hasMore ? (
-                <p className="text-gray-500">You reached the end</p>
-              ) : (
+              {page < totalPages ? (
                 <button
                   className="btn bg-blue-500 text-white"
                   onClick={loadMoreProducts}
@@ -102,6 +99,8 @@ export default function Home() {
                 >
                   Load More
                 </button>
+              ) : (
+                <p className="text-gray-500">You reached the end</p>
               )}
             </div>
           </>

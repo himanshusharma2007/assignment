@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL ="/api";
+const API_BASE_URL = "/api";
 
 export const fetchProducts = async ({
   category,
@@ -8,7 +8,6 @@ export const fetchProducts = async ({
   page = 1,
   limit = 10,
 }) => {
-  console.log("category in fetchProducts :>> ", category);
   try {
     const response = await axios.get(`${API_BASE_URL}/products`, {
       params: { category, search, page, limit },
